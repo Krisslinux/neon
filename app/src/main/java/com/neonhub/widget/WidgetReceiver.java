@@ -26,7 +26,7 @@ public class WidgetReceiver extends AppWidgetProvider {
   @Override public void onReceive(Context c,Intent i){super.onReceive(c,i); if(i!=null && !AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(i.getAction()))updateAll(c);}
   static void updateAll(Context c) {
     AppWidgetManager m=AppWidgetManager.getInstance(c);
-    Class<?>[] classes={WidgetReceiver.class,AiReceiver.class,BatteryReceiver.class,BluetoothReceiver.class,MusicReceiver.class};
+    Class<?>[] classes={WidgetReceiver.class,HubAiReceiver.class,HubBatteryReceiver.class,HubBluetoothReceiver.class,HubMusicReceiver.class};
     for(Class<?> cl:classes){int[] ids=m.getAppWidgetIds(new ComponentName(c,cl)); for(int id:ids)render(c,m,id,cl);}
   }
   static PendingIntent pending(Context c,String action,int req){
@@ -36,10 +36,10 @@ public class WidgetReceiver extends AppWidgetProvider {
   static RemoteViews view(Context c,Class<?> widgetClass) {
     RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.widget);
     boolean hub=widgetClass==WidgetReceiver.class;
-    boolean ai=widgetClass==AiReceiver.class;
-    boolean bat=widgetClass==BatteryReceiver.class;
-    boolean bt=widgetClass==BluetoothReceiver.class;
-    boolean music=widgetClass==MusicReceiver.class;
+    boolean ai=widgetClass==HubAiReceiver.class;
+    boolean bat=widgetClass==HubBatteryReceiver.class;
+    boolean bt=widgetClass==HubBluetoothReceiver.class;
+    boolean music=widgetClass==HubMusicReceiver.class;
     v.setTextViewText(R.id.title,"✦  "+(hub?"NEON HUB":ai?"AI LAUNCHER":bat?"BATTERY":bt?"BLUETOOTH":"MUSIC"));
     v.setViewVisibility(R.id.ai_section,(hub||ai)?0:8);
     v.setViewVisibility(R.id.status_section,(hub||bat||bt)?0:8);
