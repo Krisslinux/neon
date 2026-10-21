@@ -6,17 +6,24 @@ workflows:
     environment:
       java: 17
     scripts:
-      - name: Build debug APK
+      - name: Build debug APK (Gradle 8.9)
         script: |
           set -eu
           export GRADLE_USER_HOME="$CM_BUILD_DIR/.gradle"
-          if command -v gradle >/dev/null 2>&1; then
-            gradle :app:assembleDebug --no-daemon --stacktrace
-          else
-            curl -fsSL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o /tmp/gradle.zip
-            unzip -q /tmp/gradle.zip -d /tmp
-            /tmp/gradle-8.9/bin/gradle :app:assembleDebug --no-daemon --stacktrace
+          GRADLE_ZIP="$CM_BUILD_DIR/gradle-8.9-bin.zip"
+          GRADLE_EXEC="$CM_BUILD_DIR/gradle-8.9/bin/gradle"
+
+          # The preinstalled Gradle may be older than the Android plugin requires.
+          # Always invoke Gradle 8.9, rather than the version on PATH.
+          if [ ! -x "$GRADLE_EXEC" ]; then
+            curl --fail --location --retry 3 --silent --show-error \
+              "https://services.gradle.org/distributions/gradle-8.9-bin.zip" \
+              --output "$GRADLE_ZIP"
+            unzip -q -o "$GRADLE_ZIP" -d "$CM_BUILD_DIR"
           fi
+
+          "$GRADLE_EXEC" --version
+          "$GRADLE_EXEC" :app:assembleDebug --no-daemon --stacktrace
           test -s app/build/outputs/apk/debug/app-debug.apk
     artifacts:
       - app/build/outputs/apk/debug/*.apk
